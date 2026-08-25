@@ -1486,10 +1486,85 @@ main {
   border: 1px solid #ded8cf;
 }
 
+.builder-category-editor,
 .builder-menu-editor {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.builder-menu-help {
+  margin: 0 0 2px;
+  padding: 12px 14px;
+  color: #6e665d;
+  background: #fff8eb;
+  border: 1px solid #f1dfbd;
+  border-radius: 12px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.builder-menu-category {
+  padding: 20px;
+  background: white;
+  border: 1px solid #dcd4ca;
+  border-radius: 17px;
+  box-shadow: 0 10px 26px rgba(61, 51, 42, 0.05);
+}
+
+.builder-menu-category__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.builder-menu-category__header > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.builder-menu-category__header strong {
+  font-size: 14px;
+}
+
+.builder-menu-category__header span {
+  padding: 4px 7px;
+  color: var(--many-red);
+  background: #fff0ed;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.builder-menu-category__header button {
+  width: 28px;
+  height: 28px;
+  color: #5e574f;
+  background: #f7f3ee;
+  border: 1px solid #e2dbd2;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.builder-menu-category__header button:disabled {
+  opacity: 0.35;
+}
+
+.builder-menu-category__header button.is-delete {
+  width: auto;
+  padding: 0 7px;
+  color: #9b514b;
+  background: transparent;
+  border-color: transparent;
+  font-size: 9px;
+}
+
+.builder-menu-category > .builder-field {
+  margin-bottom: 16px;
 }
 
 .builder-menu-item {
@@ -1523,6 +1598,91 @@ main {
   margin-bottom: 14px;
 }
 
+.builder-menu-item__layout {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.builder-photo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #37332e;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.builder-photo-picker {
+  position: relative;
+  display: grid;
+  width: 116px;
+  height: 104px;
+  place-items: center;
+  overflow: hidden;
+  color: #8b8177;
+  background: #fff;
+  border: 1px dashed #cfc6bc;
+  border-radius: 11px;
+  cursor: pointer;
+}
+
+.builder-photo-picker > span {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 9px;
+}
+
+.builder-photo-picker > span b {
+  color: var(--many-red);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.builder-photo-picker img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.builder-photo-picker.has-image::after {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 4px 6px;
+  color: white;
+  background: rgba(31, 28, 25, 0.74);
+  border-radius: 6px;
+  content: '교체';
+  font-size: 8px;
+}
+
+.builder-photo-picker input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.builder-photo-field small {
+  color: #978e84;
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.builder-photo-field > button {
+  align-self: flex-start;
+  padding: 0;
+  color: #9b514b;
+  background: transparent;
+  border: 0;
+  font-size: 9px;
+  font-weight: 800;
+}
+
 .builder-add-button {
   min-height: 45px;
   color: var(--many-red);
@@ -1531,6 +1691,11 @@ main {
   border-radius: 12px;
   font-size: 12px;
   font-weight: 900;
+}
+
+.builder-add-button.is-item {
+  min-height: 40px;
+  background: white;
 }
 
 .builder-guide-grid {
@@ -1825,12 +1990,30 @@ main {
   font-weight: 500;
 }
 
+.builder-preview-category + .builder-preview-category {
+  margin-top: 18px;
+}
+
 .builder-preview-menu article {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
   padding: 9px 0;
   border-top: 1px solid #f0ebe5;
+}
+
+.builder-preview-menu article > img {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.builder-preview-menu article > div {
+  flex: 1;
+  min-width: 0;
 }
 
 .builder-preview-menu strong,
@@ -1992,6 +2175,20 @@ main {
   .builder-form-grid,
   .builder-guide-grid {
     grid-template-columns: 1fr;
+  }
+
+  .builder-menu-item__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .builder-photo-picker {
+    width: 100%;
+    height: 160px;
+  }
+
+  .builder-menu-category__header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .builder-field--wide,

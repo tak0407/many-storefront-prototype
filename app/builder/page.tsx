@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 type StepKey = 'store' | 'menu' | 'guide' | 'order';
-type SectionKey = 'store' | 'signature' | 'classics' | 'howToEat' | 'wifi' | 'restroom' | 'story';
+type SectionKey = 'store' | 'menu' | 'howToEat' | 'wifi' | 'restroom' | 'story';
 
 type StoreDraft = {
   name: string;
@@ -21,10 +21,16 @@ type StoreDraft = {
 
 type MenuItem = {
   id: number;
-  category: 'signature' | 'classics';
   name: string;
   description: string;
   price: string;
+  image: string;
+};
+
+type MenuCategory = {
+  id: number;
+  name: string;
+  items: MenuItem[];
 };
 
 const initialStore: StoreDraft = {
@@ -41,18 +47,29 @@ const initialStore: StoreDraft = {
   story: '어머니가 1989년 여섯 자리 작은 식당을 열었습니다. 지금도 2대째 같은 솥에 국물을 준비합니다.',
 };
 
-const initialMenu: MenuItem[] = [
-  { id: 1, category: 'signature', name: '들깨 수제비', description: '고소한 들깨 국물과 손으로 뜯은 반죽', price: '12,000' },
-  { id: 2, category: 'signature', name: '한우 떡갈비', description: '숯불에 구운 한우와 배 간장 소스', price: '19,000' },
-  { id: 3, category: 'classics', name: '장어탕', description: '12시간 우린 깊고 구수한 국물', price: '15,000' },
+const initialMenuCategories: MenuCategory[] = [
+  {
+    id: 1,
+    name: '대표 메뉴',
+    items: [
+      { id: 1, name: '들깨 수제비', description: '고소한 들깨 국물과 손으로 뜯은 반죽', price: '12,000', image: '' },
+      { id: 2, name: '한우 떡갈비', description: '숯불에 구운 한우와 배 간장 소스', price: '19,000', image: '' },
+    ],
+  },
+  {
+    id: 2,
+    name: '밥과 국',
+    items: [
+      { id: 3, name: '장어탕', description: '12시간 우린 깊고 구수한 국물', price: '15,000', image: '' },
+    ],
+  },
 ];
 
-const initialOrder: SectionKey[] = ['store', 'signature', 'classics', 'howToEat', 'wifi', 'restroom', 'story'];
+const initialOrder: SectionKey[] = ['store', 'menu', 'howToEat', 'wifi', 'restroom', 'story'];
 
 const sectionLabels: Record<SectionKey, string> = {
   store: '가게 정보',
-  signature: '대표 메뉴',
-  classics: '밥과 국',
+  menu: '메뉴',
   howToEat: '맛있게 먹는 법',
   wifi: '와이파이',
   restroom: '화장실',
@@ -61,7 +78,7 @@ const sectionLabels: Record<SectionKey, string> = {
 
 const steps: Array<{ key: StepKey; number: string; label: string; helper: string }> = [
   { key: 'store', number: '01', label: '가게 정보', helper: '이름·소개·영업정보' },
-  { key: 'menu', number: '02', label: '메뉴', helper: '메뉴명·가격·설명' },
+  { key: 'menu', number: '02', label: '메뉴', helper: '카테고리·메뉴·사진' },
   { key: 'guide', number: '03', label: '이용 안내', helper: '와이파이·화장실·추가 정보' },
   { key: 'order', number: '04', label: '순서와 공개', helper: '섹션 순서·언어 확인' },
 ];
@@ -88,7 +105,7 @@ function Field({ label, value, onChange, placeholder, multiline = false }: {
 export default function BuilderPage() {
   const [activeStep, setActiveStep] = useState<StepKey>('store');
   const [store, setStore] = useState<StoreDraft>(initialStore);
-  const [menu, setMenu] = useState<MenuItem[]>(initialMenu);
+  const [menuCategories, setMenuCategories] = useState<MenuCategory[]>(initialMenuCategories);
   const [order, setOrder] = useState<SectionKey[]>(initialOrder);
   const [toast, setToast] = useState('');
   const [savedAt, setSavedAt] = useState('');
@@ -97,10 +114,24 @@ export default function BuilderPage() {
     const saved = window.localStorage.getItem('many-builder-draft');
     if (!saved) return;
     try {
-      const draft = JSON.parse(saved) as { store?: StoreDraft; menu?: MenuItem[]; order?: SectionKey[] };
+      const draft = JSON.parse(saved) as {
+        store?: StoreDraft;
+        menuCategories?: MenuCategory[];
+        menu?: Array<Omit<MenuItem, 'image'> & { category?: string; image?: string }>;
+        order?: SectionKey[];
+      };
       if (draft.store) setStore(draft.store);
-      if (draft.menu) setMenu(draft.menu);
-      if (draft.order) setOrder(draft.order);
+      if (draft.menuCategories) {
+        setMenuCategories(draft.menuCategories);
+      } else if (draft.menu) {
+        const signature = draft.menu.filter((item) => item.category === 'signature').map((item) => ({ ...item, image: item.image || '' }));
+        const classics = draft.menu.filter((item) => item.category !== 'signature').map((item) => ({ ...item, image: item.image || '' }));
+        setMenuCategories([
+          { id: 1, name: '대표 메뉴', items: signature },
+          { id: 2, name: '밥과 국', items: classics },
+        ]);
+      }
+      if (draft.order) setOrder(draft.order.includes('menu') ? draft.order : initialOrder);
     } catch {
       window.localStorage.removeItem('many-builder-draft');
     }
@@ -112,31 +143,81 @@ export default function BuilderPage() {
       if (section === 'restroom') return Boolean(store.restroom);
       if (section === 'howToEat') return Boolean(store.howToEat);
       if (section === 'story') return Boolean(store.story);
-      if (section === 'signature' || section === 'classics') return menu.some((item) => item.category === section && item.name);
+      if (section === 'menu') return menuCategories.some((category) => category.name && category.items.some((item) => item.name));
       return true;
     }),
-    [menu, order, store],
+    [menuCategories, order, store],
   );
 
   function updateStore(key: keyof StoreDraft, value: string) {
     setStore((current) => ({ ...current, [key]: value }));
   }
 
-  function updateMenu(id: number, key: 'name' | 'description' | 'price', value: string) {
-    setMenu((current) => current.map((item) => (item.id === id ? { ...item, [key]: value } : item)));
+  function updateMenuCategory(id: number, name: string) {
+    setMenuCategories((current) => current.map((category) => (category.id === id ? { ...category, name } : category)));
   }
 
-  function updateMenuCategory(id: number, category: MenuItem['category']) {
-    setMenu((current) => current.map((item) => (item.id === id ? { ...item, category } : item)));
+  function addMenuCategory() {
+    const nextId = Math.max(0, ...menuCategories.map((category) => category.id)) + 1;
+    setMenuCategories((current) => [...current, { id: nextId, name: '', items: [] }]);
   }
 
-  function addMenuItem() {
-    const nextId = Math.max(0, ...menu.map((item) => item.id)) + 1;
-    setMenu((current) => [...current, { id: nextId, category: 'classics', name: '', description: '', price: '' }]);
+  function removeMenuCategory(id: number) {
+    setMenuCategories((current) => current.filter((category) => category.id !== id));
   }
 
-  function removeMenuItem(id: number) {
-    setMenu((current) => current.filter((item) => item.id !== id));
+  function moveMenuCategory(id: number, direction: -1 | 1) {
+    setMenuCategories((current) => {
+      const currentIndex = current.findIndex((category) => category.id === id);
+      const targetIndex = currentIndex + direction;
+      if (currentIndex < 0 || targetIndex < 0 || targetIndex >= current.length) return current;
+      const next = [...current];
+      [next[currentIndex], next[targetIndex]] = [next[targetIndex], next[currentIndex]];
+      return next;
+    });
+  }
+
+  function updateMenu(categoryId: number, itemId: number, key: 'name' | 'description' | 'price' | 'image', value: string) {
+    setMenuCategories((current) => current.map((category) => (
+      category.id === categoryId
+        ? { ...category, items: category.items.map((item) => (item.id === itemId ? { ...item, [key]: value } : item)) }
+        : category
+    )));
+  }
+
+  function addMenuItem(categoryId: number) {
+    const allItems = menuCategories.flatMap((category) => category.items);
+    const nextId = Math.max(0, ...allItems.map((item) => item.id)) + 1;
+    setMenuCategories((current) => current.map((category) => (
+      category.id === categoryId
+        ? { ...category, items: [...category.items, { id: nextId, name: '', description: '', price: '', image: '' }] }
+        : category
+    )));
+  }
+
+  function removeMenuItem(categoryId: number, itemId: number) {
+    setMenuCategories((current) => current.map((category) => (
+      category.id === categoryId
+        ? { ...category, items: category.items.filter((item) => item.id !== itemId) }
+        : category
+    )));
+  }
+
+  function selectMenuImage(categoryId: number, itemId: number, file?: File) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setToast('이미지 파일만 선택할 수 있습니다');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setToast('사진은 2MB 이하로 선택해주세요');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') updateMenu(categoryId, itemId, 'image', reader.result);
+    };
+    reader.readAsDataURL(file);
   }
 
   function moveSection(section: SectionKey, direction: -1 | 1) {
@@ -149,7 +230,13 @@ export default function BuilderPage() {
   }
 
   function saveDraft(message = '작성 중인 내용을 이 브라우저에 저장했습니다') {
-    window.localStorage.setItem('many-builder-draft', JSON.stringify({ store, menu, order }));
+    try {
+      window.localStorage.setItem('many-builder-draft', JSON.stringify({ store, menuCategories, order }));
+    } catch {
+      setToast('사진 용량이 커서 저장하지 못했습니다. 사진 수나 용량을 줄여주세요.');
+      window.setTimeout(() => setToast(''), 3000);
+      return;
+    }
     setSavedAt(new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit' }).format(new Date()));
     setToast(message);
     window.setTimeout(() => setToast(''), 2200);
@@ -177,28 +264,56 @@ export default function BuilderPage() {
 
     if (activeStep === 'menu') {
       return (
-        <div className="builder-menu-editor">
-          {menu.map((item, index) => (
-            <article className="builder-menu-item" key={item.id}>
-              <div className="builder-menu-item__header">
-                <strong>메뉴 {index + 1}</strong>
-                <button type="button" onClick={() => removeMenuItem(item.id)}>삭제</button>
+        <div className="builder-category-editor">
+          <p className="builder-menu-help">메뉴 1, 메뉴 2는 각각 카테고리입니다. 카테고리 안에 실제 판매 메뉴를 추가해주세요.</p>
+          {menuCategories.map((category, categoryIndex) => (
+            <article className="builder-menu-category" key={category.id}>
+              <div className="builder-menu-category__header">
+                <div><strong>메뉴 {categoryIndex + 1}</strong><span>카테고리</span></div>
+                <div>
+                  <button type="button" disabled={categoryIndex === 0} onClick={() => moveMenuCategory(category.id, -1)} aria-label={`메뉴 ${categoryIndex + 1} 카테고리를 위로 이동`}>↑</button>
+                  <button type="button" disabled={categoryIndex === menuCategories.length - 1} onClick={() => moveMenuCategory(category.id, 1)} aria-label={`메뉴 ${categoryIndex + 1} 카테고리를 아래로 이동`}>↓</button>
+                  <button className="is-delete" type="button" onClick={() => removeMenuCategory(category.id)}>카테고리 삭제</button>
+                </div>
               </div>
-              <label className="builder-field">
-                <span>메뉴 분류</span>
-                <select value={item.category} onChange={(event) => updateMenuCategory(item.id, event.target.value as MenuItem['category'])}>
-                  <option value="signature">대표 메뉴</option>
-                  <option value="classics">밥과 국</option>
-                </select>
-              </label>
-              <div className="builder-form-grid">
-                <Field label="메뉴 이름" value={item.name} onChange={(value) => updateMenu(item.id, 'name', value)} placeholder="예: 들깨 수제비" />
-                <Field label="가격" value={item.price} onChange={(value) => updateMenu(item.id, 'price', value.replace(/[^0-9,]/g, ''))} placeholder="12,000" />
-                <div className="builder-field--wide"><Field label="한 줄 설명" value={item.description} onChange={(value) => updateMenu(item.id, 'description', value)} /></div>
+              <Field label="카테고리 이름" value={category.name} onChange={(value) => updateMenuCategory(category.id, value)} placeholder="예: 대표 메뉴, 식사류, 음료" />
+              <div className="builder-menu-editor">
+                {category.items.map((item, itemIndex) => (
+                  <article className="builder-menu-item" key={item.id}>
+                    <div className="builder-menu-item__header">
+                      <strong>항목 {itemIndex + 1}</strong>
+                      <button type="button" onClick={() => removeMenuItem(category.id, item.id)}>삭제</button>
+                    </div>
+                    <div className="builder-menu-item__layout">
+                      <label className="builder-photo-field">
+                        <span>메뉴 사진</span>
+                        <span className={`builder-photo-picker ${item.image ? 'has-image' : ''}`}>
+                          {item.image ? <img src={item.image} alt={`${item.name || '메뉴'} 미리보기`} /> : <span><b>＋</b>사진 선택</span>}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(event) => {
+                              selectMenuImage(category.id, item.id, event.target.files?.[0]);
+                              event.target.value = '';
+                            }}
+                          />
+                        </span>
+                        <small>JPG, PNG · 최대 2MB</small>
+                        {item.image && <button type="button" onClick={() => updateMenu(category.id, item.id, 'image', '')}>사진 삭제</button>}
+                      </label>
+                      <div className="builder-form-grid">
+                        <Field label="메뉴 이름" value={item.name} onChange={(value) => updateMenu(category.id, item.id, 'name', value)} placeholder="예: 들깨 수제비" />
+                        <Field label="가격" value={item.price} onChange={(value) => updateMenu(category.id, item.id, 'price', value.replace(/[^0-9,]/g, ''))} placeholder="12,000" />
+                        <div className="builder-field--wide"><Field label="한 줄 설명" value={item.description} onChange={(value) => updateMenu(category.id, item.id, 'description', value)} /></div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+                <button className="builder-add-button is-item" type="button" onClick={() => addMenuItem(category.id)}>＋ 이 카테고리에 메뉴 추가</button>
               </div>
             </article>
           ))}
-          <button className="builder-add-button" type="button" onClick={addMenuItem}>＋ 메뉴 추가</button>
+          <button className="builder-add-button" type="button" onClick={addMenuCategory}>＋ 메뉴 카테고리 추가</button>
         </div>
       );
     }
@@ -242,9 +357,27 @@ export default function BuilderPage() {
     if (section === 'store') {
       return <section className="builder-preview-about" key={section}><p>{store.introduction || '가게 설명을 입력해주세요.'}</p><dl><div><dt>주소</dt><dd>{store.address}</dd></div><div><dt>영업시간</dt><dd>{store.hours}</dd></div><div><dt>전화</dt><dd>{store.phone}</dd></div></dl></section>;
     }
-    if (section === 'signature' || section === 'classics') {
-      const items = menu.filter((item) => item.category === section && item.name);
-      return <section className="builder-preview-section" key={section}><p className="builder-preview-kicker">메뉴</p><h3>{sectionLabels[section]}</h3><div className="builder-preview-menu">{items.map((item) => <article key={item.id}><div><strong>{item.name}</strong><small>{item.description}</small></div><b>₩{item.price || '0'}</b></article>)}</div></section>;
+    if (section === 'menu') {
+      const visibleCategories = menuCategories.filter((category) => category.name && category.items.some((item) => item.name));
+      return (
+        <section className="builder-preview-section" key={section}>
+          <p className="builder-preview-kicker">메뉴</p>
+          {visibleCategories.map((category) => (
+            <div className="builder-preview-category" key={category.id}>
+              <h3>{category.name}</h3>
+              <div className="builder-preview-menu">
+                {category.items.filter((item) => item.name).map((item) => (
+                  <article key={item.id}>
+                    {item.image && <img src={item.image} alt="" />}
+                    <div><strong>{item.name}</strong><small>{item.description}</small></div>
+                    <b>₩{item.price || '0'}</b>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+      );
     }
     const value = section === 'wifi' ? `${store.wifiName} · ${store.wifiPassword}` : section === 'restroom' ? store.restroom : section === 'howToEat' ? store.howToEat : store.story;
     return <section className="builder-preview-info" key={section}><span>{section === 'wifi' ? 'Wi' : section === 'restroom' ? 'WC' : section === 'howToEat' ? 'TIP' : 'STORY'}</span><div><h3>{sectionLabels[section]}</h3><p>{value}</p></div></section>;
