@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-type Language = 'en' | 'ja' | 'zh';
+type Language = 'ko' | 'en' | 'ja' | 'zh';
 type SectionKey =
   | 'about'
   | 'signature'
@@ -29,12 +29,38 @@ const DEFAULT_ORDER: SectionKey[] = [
 ];
 
 const languages: { key: Language; label: string }[] = [
+  { key: 'ko', label: '한국어' },
   { key: 'en', label: 'EN' },
   { key: 'ja', label: '日本語' },
   { key: 'zh', label: '中文' },
 ];
 
 const globalCopy: Record<Language, Record<string, string>> = {
+  ko: {
+    prototypeLabel: '인터랙티브 프로토타입',
+    editLayout: '섹션 순서 편집',
+    openNow: '영업 중',
+    neighborhood: '성수 · 서울',
+    storeName: '옥담 한식당',
+    tagline: '매일 아침 천천히 준비한, 서울의 정직한 맛을 담은 작은 식탁입니다.',
+    reviewCount: '동네 인기 맛집 · 리뷰 128개',
+    viewMap: '지도 보기',
+    call: '전화',
+    share: '공유',
+    footer: '어떤 언어로도 더 다정한 동네를 만듭니다.',
+    previewSettings: '미리보기 설정',
+    sectionOrder: '섹션 순서',
+    layoutHelp: '섹션을 끌거나 화살표 버튼으로 순서를 바꿔보세요. 내용이 없는 섹션은 방문자에게 보이지 않습니다.',
+    resetOrder: '순서 초기화',
+    viewPage: '페이지 보기',
+    visible: '방문자에게 표시',
+    hidden: '숨김 · 내용 없음',
+    copied: '와이파이 비밀번호를 복사했습니다',
+    shared: '링크를 복사했습니다',
+    updated: '섹션 순서를 변경했습니다',
+    copy: '복사',
+    signatureBadge: '대표 메뉴',
+  },
   en: {
     prototypeLabel: 'Interactive prototype',
     editLayout: 'Edit section order',
@@ -114,86 +140,93 @@ const globalCopy: Record<Language, Record<string, string>> = {
 
 const sectionMeta: Record<SectionKey, { kicker: Localized; title: Localized; nav: Localized; description: Localized }> = {
   about: {
-    kicker: { en: 'Store information', ja: '店舗情報', zh: '店铺信息' },
-    title: { en: 'Good food starts with good basics.', ja: '基本を大切にした、まっすぐな料理。', zh: '好味道，从认真做好基本开始。' },
-    nav: { en: 'About', ja: '店舗', zh: '店铺' },
+    kicker: { ko: '가게 정보', en: 'Store information', ja: '店舗情報', zh: '店铺信息' },
+    title: { ko: '좋은 음식은 기본에서 시작합니다.', en: 'Good food starts with good basics.', ja: '基本を大切にした、まっすぐな料理。', zh: '好味道，从认真做好基本开始。' },
+    nav: { ko: '가게 소개', en: 'About', ja: '店舗', zh: '店铺' },
     description: {
+      ko: '영업시간부터 가장 가까운 지하철 출구까지, 방문 전에 필요한 정보를 모았습니다.',
       en: 'Everything you need before you visit, from opening hours to the nearest subway exit.',
       ja: '営業時間から最寄りの地下鉄出口まで、来店前に必要な情報をまとめました。',
       zh: '从营业时间到最近的地铁出口，来店前需要的信息都在这里。',
     },
   },
   signature: {
-    kicker: { en: 'Menu · 01', ja: 'メニュー · 01', zh: '菜单 · 01' },
-    title: { en: 'House signatures', ja: '店の看板料理', zh: '本店招牌' },
-    nav: { en: 'Signatures', ja: 'おすすめ', zh: '招牌' },
+    kicker: { ko: '메뉴 · 01', en: 'Menu · 01', ja: 'メニュー · 01', zh: '菜单 · 01' },
+    title: { ko: '옥담의 대표 메뉴', en: 'House signatures', ja: '店の看板料理', zh: '本店招牌' },
+    nav: { ko: '대표 메뉴', en: 'Signatures', ja: 'おすすめ', zh: '招牌' },
     description: {
+      ko: '단골이 다시 찾는 메뉴입니다. 사진과 설명은 사장님이 입력한 경우에만 표시됩니다.',
       en: 'The dishes regulars return for. Photos and descriptions appear only when the owner adds them.',
       ja: '常連客が何度も注文する料理。写真と説明は、店主が登録した場合のみ表示されます。',
       zh: '熟客一次次回来点的菜。只有店主录入后，才会显示照片和说明。',
     },
   },
   classics: {
-    kicker: { en: 'Menu · 02', ja: 'メニュー · 02', zh: '菜单 · 02' },
-    title: { en: 'Rice & warm bowls', ja: 'ご飯と温かい一椀', zh: '米饭与暖汤' },
-    nav: { en: 'Rice & soup', ja: 'ご飯・スープ', zh: '饭与汤' },
+    kicker: { ko: '메뉴 · 02', en: 'Menu · 02', ja: 'メニュー · 02', zh: '菜单 · 02' },
+    title: { ko: '밥과 따뜻한 한 그릇', en: 'Rice & warm bowls', ja: 'ご飯と温かい一椀', zh: '米饭与暖汤' },
+    nav: { ko: '밥과 국', en: 'Rice & soup', ja: 'ご飯・スープ', zh: '饭与汤' },
     description: {
+      ko: '밥과 매장에서 직접 만든 다섯 가지 반찬을 함께 내는 든든한 일상 메뉴입니다.',
       en: 'Comforting everyday dishes served with rice and five house-made side dishes.',
       ja: 'ご飯と手作りのおかず5品が付く、毎日食べたい温かな料理です。',
       zh: '暖心的日常料理，配米饭与五种店内自制小菜。',
     },
   },
   howToEat: {
-    kicker: { en: 'Local tip', ja: '食べ方', zh: '美味吃法' },
-    title: { en: 'How to enjoy your meal', ja: 'もっとおいしく楽しむ方法', zh: '这样吃更美味' },
-    nav: { en: 'How to eat', ja: '食べ方', zh: '吃法' },
+    kicker: { ko: '가게의 팁', en: 'Local tip', ja: '食べ方', zh: '美味吃法' },
+    title: { ko: '더 맛있게 드시는 법', en: 'How to enjoy your meal', ja: 'もっとおいしく楽しむ方法', zh: '这样吃更美味' },
+    nav: { ko: '먹는 법', en: 'How to eat', ja: '食べ方', zh: '吃法' },
     description: {
+      ko: '사장님이 알려드리는 짧은 안내입니다. 중요한 내용이라면 페이지 위쪽으로 옮길 수 있습니다.',
       en: 'A short guide from the owner, placed high on the page when it matters most.',
       ja: '店主からの短い案内。大切な内容ならページ上部へ移動できます。',
       zh: '来自店主的简短说明。重要内容可移动到页面上方。',
     },
   },
   wifi: {
-    kicker: { en: 'Guest information', ja: 'ご案内', zh: '顾客信息' },
-    title: { en: 'Wi-Fi', ja: 'Wi-Fi', zh: 'Wi-Fi' },
-    nav: { en: 'Wi-Fi', ja: 'Wi-Fi', zh: 'Wi-Fi' },
+    kicker: { ko: '이용 안내', en: 'Guest information', ja: 'ご案内', zh: '顾客信息' },
+    title: { ko: '와이파이', en: 'Wi-Fi', ja: 'Wi-Fi', zh: 'Wi-Fi' },
+    nav: { ko: '와이파이', en: 'Wi-Fi', ja: 'Wi-Fi', zh: 'Wi-Fi' },
     description: {
+      ko: '매장 어디서나 무료 와이파이를 이용하실 수 있습니다.',
       en: 'Free guest Wi-Fi is available throughout the restaurant.',
       ja: '店内では無料Wi-Fiをご利用いただけます。',
       zh: '店内提供免费Wi-Fi。',
     },
   },
   restroom: {
-    kicker: { en: 'Guest information', ja: 'ご案内', zh: '顾客信息' },
-    title: { en: 'Restroom', ja: 'お手洗い', zh: '洗手间' },
-    nav: { en: 'Restroom', ja: 'お手洗い', zh: '洗手间' },
+    kicker: { ko: '이용 안내', en: 'Guest information', ja: 'ご案内', zh: '顾客信息' },
+    title: { ko: '화장실', en: 'Restroom', ja: 'お手洗い', zh: '洗手间' },
+    nav: { ko: '화장실', en: 'Restroom', ja: 'お手洗い', zh: '洗手间' },
     description: {
+      ko: '화장실은 매장 안에 있으며 별도의 비밀번호가 필요하지 않습니다.',
       en: 'The restroom is inside the restaurant. No door code is needed.',
       ja: 'お手洗いは店内にあります。暗証番号は必要ありません。',
       zh: '洗手间位于店内，无需门锁密码。',
     },
   },
   story: {
-    kicker: { en: 'Our story', ja: '店の物語', zh: '我们的故事' },
-    title: { en: 'A broth passed down for 37 years.', ja: '37年受け継がれてきた出汁。', zh: '传承37年的一锅汤。' },
-    nav: { en: 'Our story', ja: '店の物語', zh: '品牌故事' },
+    kicker: { ko: '가게 이야기', en: 'Our story', ja: '店の物語', zh: '我们的故事' },
+    title: { ko: '37년 동안 이어온 한 솥의 국물.', en: 'A broth passed down for 37 years.', ja: '37年受け継がれてきた出汁。', zh: '传承37年的一锅汤。' },
+    nav: { ko: '가게 이야기', en: 'Our story', ja: '店の物語', zh: '品牌故事' },
     description: {
+      ko: '전하고 싶은 이야기가 있을 때만 사장님이 작성한 자유 섹션을 보여줍니다.',
       en: 'An owner-written section appears only when there is a story worth telling.',
       ja: '伝えたい物語がある時だけ、店主が書いた自由セクションを表示できます。',
       zh: '只有在值得讲述时，店主撰写的自由内容才会出现在店铺页面。',
     },
   },
   optionalThree: {
-    kicker: { en: 'Optional section · 03', ja: '自由項目 · 03', zh: '自由栏目 · 03' },
-    title: { en: 'Seasonal notice', ja: '季節のお知らせ', zh: '时令通知' },
-    nav: { en: 'Seasonal', ja: '季節', zh: '时令' },
-    description: { en: '', ja: '', zh: '' },
+    kicker: { ko: '자유 섹션 · 03', en: 'Optional section · 03', ja: '自由項目 · 03', zh: '自由栏目 · 03' },
+    title: { ko: '계절 안내', en: 'Seasonal notice', ja: '季節のお知らせ', zh: '时令通知' },
+    nav: { ko: '계절 안내', en: 'Seasonal', ja: '季節', zh: '时令' },
+    description: { ko: '', en: '', ja: '', zh: '' },
   },
   optionalFour: {
-    kicker: { en: 'Optional section · 04', ja: '自由項目 · 04', zh: '自由栏目 · 04' },
-    title: { en: 'Visitor note', ja: 'ご来店案内', zh: '到店须知' },
-    nav: { en: 'Visitor note', ja: 'ご案内', zh: '到店须知' },
-    description: { en: '', ja: '', zh: '' },
+    kicker: { ko: '자유 섹션 · 04', en: 'Optional section · 04', ja: '自由項目 · 04', zh: '自由栏目 · 04' },
+    title: { ko: '방문 안내', en: 'Visitor note', ja: 'ご来店案内', zh: '到店须知' },
+    nav: { ko: '방문 안내', en: 'Visitor note', ja: 'ご案内', zh: '到店须知' },
+    description: { ko: '', en: '', ja: '', zh: '' },
   },
 };
 
@@ -208,8 +241,9 @@ const menuGroups: Record<'signature' | 'classics', Array<{
   signature: [
     {
       korean: '들깨 수제비',
-      name: { en: 'Perilla Seed Sujebi', ja: 'エゴマすいとん', zh: '紫苏籽面片汤' },
+      name: { ko: '들깨 수제비', en: 'Perilla Seed Sujebi', ja: 'エゴマすいとん', zh: '紫苏籽面片汤' },
       description: {
+        ko: '고소한 들깨 국물에 손으로 뜯은 반죽과 감자, 느타리버섯을 넣었습니다.',
         en: 'Hand-torn dough in a nutty perilla broth with potato and oyster mushroom.',
         ja: '香ばしいエゴマのスープに、手ちぎり生地、じゃがいも、ヒラタケを合わせました。',
         zh: '手撕面片配浓香紫苏籽汤，加入土豆与平菇。',
@@ -220,8 +254,9 @@ const menuGroups: Record<'signature' | 'classics', Array<{
     },
     {
       korean: '한우 떡갈비',
-      name: { en: 'Hanwoo Tteokgalbi', ja: '韓牛トッカルビ', zh: '韩牛肉饼' },
+      name: { ko: '한우 떡갈비', en: 'Hanwoo Tteokgalbi', ja: '韓牛トッカルビ', zh: '韩牛肉饼' },
       description: {
+        ko: '숯불에 구운 한우 떡갈비에 배를 넣은 간장 소스와 제철 나물을 곁들였습니다.',
         en: 'Charcoal-grilled Korean beef patty, pear soy glaze, and seasonal greens.',
         ja: '炭火で焼いた韓牛のハンバーグに、梨入り醤油だれと季節の青菜を添えました。',
         zh: '炭火烤韩牛牛肉饼，配梨香酱油汁与时令蔬菜。',
@@ -234,8 +269,9 @@ const menuGroups: Record<'signature' | 'classics', Array<{
   classics: [
     {
       korean: '장어탕',
-      name: { en: 'Freshwater Eel Soup', ja: 'うなぎの滋養スープ', zh: '鳗鱼滋补汤' },
+      name: { ko: '장어탕', en: 'Freshwater Eel Soup', ja: 'うなぎの滋養スープ', zh: '鳗鱼滋补汤' },
       description: {
+        ko: '12시간 우린 진한 국물에 부드러운 민물장어를 넣었습니다. 깊고 구수하며 맵지 않습니다.',
         en: 'A rich 12-hour broth with tender eel. Deeply savory and not spicy.',
         ja: '12時間煮込んだ濃厚な出汁と柔らかなうなぎ。辛くありません。',
         zh: '慢熬12小时的浓郁汤底与软嫩鳗鱼，不辣。',
@@ -245,8 +281,9 @@ const menuGroups: Record<'signature' | 'classics', Array<{
     },
     {
       korean: '나물 비빔밥',
-      name: { en: 'Seasonal Bibimbap', ja: '季節のナムルビビンバ', zh: '时蔬拌饭' },
+      name: { ko: '제철 나물 비빔밥', en: 'Seasonal Bibimbap', ja: '季節のナムルビビンバ', zh: '时蔬拌饭' },
       description: {
+        ko: '일곱 가지 나물과 달걀프라이, 참기름을 올리고 순한 고추장은 따로 내드립니다.',
         en: 'Seven vegetables, fried egg, sesame oil, and mild gochujang served separately.',
         ja: '7種の野菜、目玉焼き、ごま油。辛さ控えめのコチュジャンは別添えです。',
         zh: '七种蔬菜、煎蛋和芝麻油，微辣辣椒酱另放。',
@@ -259,11 +296,13 @@ const menuGroups: Record<'signature' | 'classics', Array<{
 
 const aboutCopy = {
   quote: {
+    ko: '“우리 가족에게 내어도 좋은 음식을 만듭니다.”',
     en: '“We make the kind of food we would serve to our own family.”',
     ja: '「家族に出したいと思える料理を作ります。」',
     zh: '“我们做的，是愿意端给自己家人的饭菜。”',
   },
   body: {
+    ko: '옥담은 한씨 가족이 2대째 운영하는 동네 한식당입니다. 새벽부터 국물을 우리고, 모든 반찬을 매장에서 직접 만듭니다.',
     en: 'OKDAM is a neighborhood Korean kitchen run by two generations of the Han family. Our stocks simmer from dawn, and every side dish is made in the restaurant.',
     ja: 'オクダムは、ハン一家が二代にわたり営む街の韓食堂です。夜明けから出汁を取り、すべてのおかずを店内で手作りしています。',
     zh: '玉潭是韩氏一家两代经营的社区韩餐馆。汤底从清晨开始熬制，每一道小菜都在店内亲手制作。',
@@ -272,43 +311,46 @@ const aboutCopy = {
 
 const infoRows: Array<{ label: Localized; value: Localized }> = [
   {
-    label: { en: 'Address', ja: '住所', zh: '地址' },
-    value: { en: '24 Yeonmujang-gil, Seongdong-gu, Seoul', ja: 'ソウル特別市 城東区 練武場キル24', zh: '首尔特别市 城东区 练武场街24' },
+    label: { ko: '주소', en: 'Address', ja: '住所', zh: '地址' },
+    value: { ko: '서울특별시 성동구 연무장길 24', en: '24 Yeonmujang-gil, Seongdong-gu, Seoul', ja: 'ソウル特別市 城東区 練武場キル24', zh: '首尔特别市 城东区 练武场街24' },
   },
   {
-    label: { en: 'Hours', ja: '営業時間', zh: '营业时间' },
-    value: { en: '11:30–21:00 · Break 15:00–17:00', ja: '11:30–21:00 · 休憩 15:00–17:00', zh: '11:30–21:00 · 休息 15:00–17:00' },
+    label: { ko: '영업시간', en: 'Hours', ja: '営業時間', zh: '营业时间' },
+    value: { ko: '11:30–21:00 · 쉬는 시간 15:00–17:00', en: '11:30–21:00 · Break 15:00–17:00', ja: '11:30–21:00 · 休憩 15:00–17:00', zh: '11:30–21:00 · 休息 15:00–17:00' },
   },
   {
-    label: { en: 'Phone', ja: '電話', zh: '电话' },
-    value: { en: '+82 2-3409-1287', ja: '+82 2-3409-1287', zh: '+82 2-3409-1287' },
+    label: { ko: '전화', en: 'Phone', ja: '電話', zh: '电话' },
+    value: { ko: '02-3409-1287', en: '+82 2-3409-1287', ja: '+82 2-3409-1287', zh: '+82 2-3409-1287' },
   },
   {
-    label: { en: 'Subway', ja: '地下鉄', zh: '地铁' },
-    value: { en: '6 min from Seongsu Station Exit 3', ja: '聖水駅3番出口から徒歩6分', zh: '距圣水站3号出口步行6分钟' },
+    label: { ko: '지하철', en: 'Subway', ja: '地下鉄', zh: '地铁' },
+    value: { ko: '성수역 3번 출구에서 도보 6분', en: '6 min from Seongsu Station Exit 3', ja: '聖水駅3番出口から徒歩6分', zh: '距圣水站3号出口步行6分钟' },
   },
 ];
 
 const howToSteps: Array<{ title: Localized; body: Localized }> = [
   {
-    title: { en: 'Taste the broth first', ja: 'まずスープをそのまま', zh: '先尝一口原汤' },
+    title: { ko: '먼저 국물을 맛보세요', en: 'Taste the broth first', ja: 'まずスープをそのまま', zh: '先尝一口原汤' },
     body: {
+      ko: '무언가 넣기 전에 한 숟갈 드셔보세요. 들깨와 멸치 국물에 이미 알맞게 간이 되어 있습니다.',
       en: 'Try one spoonful before adding anything. The perilla and anchovy stock is already seasoned.',
       ja: '薬味を入れる前に、まずひと口。エゴマと煮干しの出汁はそのままで味が整っています。',
       zh: '加调料前先喝一勺。紫苏籽与鳀鱼汤底已经调好味。',
     },
   },
   {
-    title: { en: 'Mix the bibimbap gently', ja: 'ビビンバはやさしく混ぜる', zh: '轻轻拌匀拌饭' },
+    title: { ko: '비빔밥은 부드럽게 섞으세요', en: 'Mix the bibimbap gently', ja: 'ビビンバはやさしく混ぜる', zh: '轻轻拌匀拌饭' },
     body: {
+      ko: '고추장은 먼저 절반만 넣고, 나물의 식감이 살아 있도록 아래에서부터 가볍게 섞어주세요.',
       en: 'Add half the gochujang first. Mix from the bottom so the vegetables keep their texture.',
       ja: 'コチュジャンはまず半分。底からやさしく混ぜると野菜の食感が残ります。',
       zh: '先放一半辣椒酱，从底部轻轻拌，让蔬菜保留口感。',
     },
   },
   {
-    title: { en: 'Wrap the last bite', ja: '最後のひと口は葉で包む', zh: '最后一口用菜叶包着吃' },
+    title: { ko: '마지막 한입은 쌈으로', en: 'Wrap the last bite', ja: '最後のひと口は葉で包む', zh: '最后一口用菜叶包着吃' },
     body: {
+      ko: '상추에 밥과 떡갈비, 김치를 조금씩 올려 싸 드시면 사장님이 가장 좋아하는 한입이 됩니다.',
       en: 'Put a little rice, tteokgalbi, and kimchi in a lettuce leaf for the owner’s favorite bite.',
       ja: 'サンチュに少量のご飯、トッカルビ、キムチを包むのが店主おすすめです。',
       zh: '生菜里放一点米饭、肉饼和泡菜，这是店主最喜欢的一口。',
@@ -317,8 +359,9 @@ const howToSteps: Array<{ title: Localized; body: Localized }> = [
 ];
 
 const restroomCopy = {
-  title: { en: 'Past the counter, on your left', ja: 'レジを過ぎて左側です', zh: '经过收银台后在左侧' },
+  title: { ko: '계산대를 지나 왼쪽에 있습니다', en: 'Past the counter, on your left', ja: 'レジを過ぎて左側です', zh: '经过收银台后在左侧' },
   body: {
+    ko: '출입구가 좁습니다. 가까운 장애인 화장실이 필요하시면 직원에게 말씀해주세요.',
     en: 'The doorway is narrow. Please ask our staff if you need an accessible restroom nearby.',
     ja: '入口が狭いため、バリアフリートイレが必要な場合はスタッフにお声がけください。',
     zh: '入口较窄，如需附近的无障碍洗手间，请咨询工作人员。',
@@ -327,11 +370,13 @@ const restroomCopy = {
 
 const storyCopy = {
   quote: {
+    ko: '“천천히 만든 음식으로 손님을 맞이합니다.”',
     en: '“Slow food is our way of welcoming you.”',
     ja: '「ゆっくり作ることが、私たちのおもてなしです。」',
     zh: '“慢慢做一顿饭，就是我们的待客之道。”',
   },
   body: {
+    ko: '어머니가 1989년 여섯 자리 작은 식당을 열었습니다. 두 번 자리를 옮기며 조금 커졌지만 국물을 내는 솥은 그대로입니다. 지금도 2대째 새벽 해가 뜨기 전부터 국물을 준비합니다.',
     en: 'My mother opened a six-seat lunch counter in 1989. We moved twice, grew a little, and kept the same stockpot. Today, the second generation still starts the broth before sunrise.',
     ja: '母が1989年に6席の食堂を開きました。二度の移転を経て少し大きくなりましたが、寸胴鍋は同じです。今も二代目が夜明け前から出汁を取ります。',
     zh: '母亲在1989年开了一间只有六个座位的小饭馆。两次搬迁后店铺大了一些，那口汤锅却一直没换。如今第二代仍在天亮前开始熬汤。',
@@ -504,7 +549,7 @@ export default function Home() {
           <article className="detail-card detail-card--wide detail-card--sage">
             <span className="detail-card__number">Wi</span>
             <h3>OKDAM_GUEST</h3>
-            <p>{language === 'en' ? 'Password' : language === 'ja' ? 'パスワード' : '密码'}</p>
+            <p>{language === 'ko' ? '비밀번호' : language === 'en' ? 'Password' : language === 'ja' ? 'パスワード' : '密码'}</p>
             <div className="wifi-password"><code>okdam2026!</code><button className="copy-button" type="button" onClick={() => copyValue('okdam2026!', text.copied)}>{text.copy}</button></div>
           </article>
         </section>
@@ -538,7 +583,10 @@ export default function Home() {
     <>
       <div className="prototype-bar">
         <div className="prototype-bar__copy"><span className="prototype-dot" /><span>{text.prototypeLabel}</span></div>
-        <button className="prototype-bar__button" type="button" onClick={() => setDrawerOpen(true)}>☷ <span>{text.editLayout}</span></button>
+        <div className="prototype-bar__actions">
+          <a className="prototype-bar__builder-link" href="/builder">사장님용 사이트 만들기</a>
+          <button className="prototype-bar__button" type="button" onClick={() => setDrawerOpen(true)}>☷ <span>{text.editLayout}</span></button>
+        </div>
       </div>
 
       <header className="site-header">
